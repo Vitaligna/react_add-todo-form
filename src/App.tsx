@@ -12,7 +12,9 @@ export const App = () => {
   const [todos, setTodos] = useState<Todo[]>(() => {
     return todosFromServer.map(todo => ({
       ...todo,
-      user: usersFromServer.find((user: User) => user.id === todo.userId)!,
+      user: usersFromServer.find(
+        (serverUser: User) => serverUser.id === todo.userId,
+      )!,
     }));
   });
 
@@ -39,8 +41,13 @@ export const App = () => {
       (serverUser: User) => serverUser.id === userId,
     )!;
 
+    const maxId =
+      todos.length > 0 ? Math.max(...todos.map(todo => todo.id)) : 0;
+
+    const newTodoId = maxId + 1;
+
     const newTodo: Todo = {
-      id: Math.max(...todos.map(todo => todo.id)) + 1,
+      id: newTodoId,
       title: title.trim(),
       userId,
       completed: false,
@@ -81,9 +88,9 @@ export const App = () => {
             }}
           >
             <option value={0}>Choose a user</option>
-            {usersFromServer.map((user: User) => (
-              <option key={user.id} value={user.id}>
-                {user.name}
+            {usersFromServer.map((serverUser: User) => (
+              <option key={serverUser.id} value={serverUser.id}>
+                {serverUser.name}
               </option>
             ))}
           </select>
