@@ -9,12 +9,13 @@ import type { Todo } from './types/Todo';
 import type { User } from './types/User';
 
 export const App = () => {
-  const preparedTodos: Todo[] = todosFromServer.map(todo => ({
-    ...todo,
-    user: usersFromServer.find(user => user.id === todo.userId)!,
-  }));
+  const [todos, setTodos] = useState<Todo[]>(() => {
+    return todosFromServer.map(todo => ({
+      ...todo,
+      user: usersFromServer.find((user: User) => user.id === todo.userId)!,
+    }));
+  });
 
-  const [todos, setTodos] = useState<Todo[]>(preparedTodos);
   const [title, setTitle] = useState('');
   const [userId, setUserId] = useState(0);
 
@@ -34,17 +35,19 @@ export const App = () => {
       return;
     }
 
-    const user = usersFromServer.find((u: User) => u.id === userId)!;
+    const selectedUser = usersFromServer.find(
+      (serverUser: User) => serverUser.id === userId,
+    )!;
 
     const newTodo: Todo = {
       id: Math.max(...todos.map(todo => todo.id)) + 1,
       title: title.trim(),
       userId,
       completed: false,
-      user,
+      user: selectedUser,
     };
 
-    setTodos(prev => [...prev, newTodo]);
+    setTodos(previousTodos => [...previousTodos, newTodo]);
     setTitle('');
     setUserId(0);
   };
@@ -60,8 +63,8 @@ export const App = () => {
             data-cy="titleInput"
             placeholder="Enter a title"
             value={title}
-            onChange={e => {
-              setTitle(e.target.value.replace(/[^a-zA-Zа-яА-Я0-9 ]/g, ''));
+            onChange={event => {
+              setTitle(event.target.value.replace(/[^a-zA-Zа-яА-Я0-9 ]/g, ''));
               setTitleError(false);
             }}
           />
@@ -72,8 +75,8 @@ export const App = () => {
           <select
             data-cy="userSelect"
             value={userId}
-            onChange={e => {
-              setUserId(Number(e.target.value));
+            onChange={event => {
+              setUserId(Number(event.target.value));
               setUserError(false);
             }}
           >
